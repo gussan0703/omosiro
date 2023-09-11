@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>期間管理アプリ</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='main.css') }}"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.0/main.min.js"></script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+
+  </head>
+  <body>
+    <header>
+      <h1>社員管理システム</h1>
+      <nav>
+        <a href="{{ url_for('index') }}" class="{{ 'active' if not category }}"
+          >全て</a
+        >
+        <a
+          href="{{ url_for('index', category='エンジニア') }}"
+          class="{{ 'active' if category == 'エンジニア' }}"
+          >エンジニア</a
+        >
+        <a
+          href="{{ url_for('index', category='通信') }}"
+          class="{{ 'active' if category == '通信' }}"
+          >通信</a
+        >
+      </nav>
+    </header>
+
+    {% with messages = get_flashed_messages() %} {% if messages %}
+    <ul class="flashes">
+      {% for message in messages %}
+      <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %} {% endwith %}
+
+    <form action="/add_employee" method="post">
+      <label for="employee_name">社員名：</label>
+      <input type="text" name="employee_name" id="employee_name" required />
+      <label for="category">カテゴリ：</label>
+      <select name="category" id="category">
+        <option value="エンジニア">エンジニア</option>
+        <option value="通信">通信</option>
+      </select>
+      <input type="submit" value="追加" />
+    </form>
+
+    <main>
+      <section>
+        <h2>社員一覧</h2>
+        <ul id="employee-list">
+          {% for employee in employees %}
+          <li>
+            {{ employee.name }} ({{ employee.category }})
+            <a href="{{ url_for('employee_detail', id=employee.id) }}">編集</a>
+
+            <!--社員のカレンダーをコンポネート-->
+            <div class="employee-calendar" data-employee-id="{{ employee.id }}">
+              <div class="month-calendar"></div>
+              <div class="month-calendar"></div>
+              <div class="month-calendar"></div>
+              <div class="month-calendar"></div>
+              <div class="month-calendar"></div>
+              <div class="month-calendar"></div>
+          </div>          
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

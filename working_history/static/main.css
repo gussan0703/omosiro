@@ -1,0 +1,23 @@
+/* static/styles.css or main.css */
+.employee-calendar {
+    display: inline-block;
+    width: 150px;  /* 月ごとのカレンダーの幅 */
+    vertical-align: top;
+    display: flex; /* 子要素を横並びにする */
+}
+
+.month-calendar {
+    flex: 1;      /* 均等にスペースを取る */
+    margin-right: 10px;  /* 右側の間隔 */
+}
+
+.month-calendar:last-child {
+    margin-right: 0;  /* 最後の要素の右側の間隔は0にする */
+}
+
+.employee-calendar .month-calendar {
+    border: 1px solid black; /* ボーダーの太さと色を変更できます */
+    margin: 10px;           /* 他の要素との間隔を追加 */
+    padding: 10px;          /* カレンダー内部の間隔を追加 */
+    box-sizing: border-box; /* ボーダーとパディングが要素の大きさに含まれるように */
+}

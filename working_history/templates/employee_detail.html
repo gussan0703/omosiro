@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ employee.name }}の詳細</title>
+  </head>
+
+  <body>
+    <h1>{{ employee.name }}詳細</h1>
+
+    <p>名前: {{ employee.name }}</p>
+    <p>カテゴリー: {{ employee.category }}</p>
+
+    <form
+      action="{{ url_for('employee_detail' , id = employee.id)}}"
+      method="post"
+    >
+      <div>
+        <label for="employee_name">名前:</label>
+        <input
+          type="text"
+          id="employee_name"
+          name="employee_name"
+          value="{{ employee.name }}"
+          required
+        />
+      </div>
+      <div>
+        <label for="category">カテゴリ：</label>
+        <select name="category" id="category">
+          <option value="エンジニア">エンジニア</option>
+          <option value="通信">通信</option>
+        </select>
+      </div>
+      <div>
+        <label for="project_name">案件の題名:</label>
+        <input
+          type="text"
+          id="project_name"
+          name="project_name"
+          value="{{ detail.project_name if detail else '' }}"
+          required
+        />
+      </div>
+      <div>
+        <label for="overview">案件の内容の概略:</label>
+        <textarea id="overview" name="overview">
+{{ detail.overview if detail else '' }}</textarea
+        >
+      </div>
+      <div>
+        <label for="start_date">開始日:</label>
+        <input
+          type="date"
+          id="start_date"
+          name="start_date"
+          value="{{ detail.start_date.strftime('%Y-%m-%d') if detail and detail.start_date else '' }}"
+          required
+        />
+      </div>
+      <div>
+        <label for="end_date">終了日:</label>
+        <input
+          type="date"
+          id="end_date"
+          name="end_date"
+          value="{{ detail.end_date.strftime('%Y-%m-%d') if detail and detail.end_date else '' }}"
+          required
+        />
+      </div>
+      <div>
+        <label for="price">単価:</label>
+        <input
+          type="number"
+          id="price"
+          name="price"
+          value="{{ detail.price if detail else '' }}"
+          required
+        />
+      </div>
+
+      <input type="submit" value="更新" />
+    </form>
+
+    <form
+      action="{{ url_for('delete_employee', id=employee.id) }}"
+      method="post"
+    >
+      <input type="submit" value="削除" />
+    </form>
+
+    <a href="{{ url_for('index') }}">社員一覧へ戻る</a>
+  </body>
+</html>
