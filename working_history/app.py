@@ -20,6 +20,7 @@ class Employee(db.Model):
     category = db.Column(db.String(80), nullable=False)
 
 class EmployeeDetail(db.Model): 
+    __tablename__ = 'employee_detail'
     id = db.Column(db.Integer, primary_key=True)
     project_name = db.Column(db.String(80), nullable=False)
     overview = db.Column(db.String(255), nullable=True)
@@ -132,22 +133,28 @@ def api_employee_periods():
             end_year += 1
 
         # 今の月から6ヶ月間のdetailsを取得
-        details = EmployeeDetail.query.filter(
-            EmployeeDetail.start_date >= datetime(current_year, current_month, 1),
-            EmployeeDetail.start_date < datetime(end_year, end_month, 1)
-        ).all()
+
+        # details = EmployeeDetail.query.filter(
+        #     EmployeeDetail.start_date >= datetime(current_year, current_month, 1),
+        #     EmployeeDetail.start_date < datetime(end_year, end_month, 1)
+        # ).all()
+        
+        details = EmployeeDetail.query.all()
+   
+        colors = ['#3498DB', '#E74C3C', '#2ECC71', '#F39C12', '#9B59B6']  # ここで使いたい色を指定する
 
         events = [{
             'title': detail.employee.name,
-            'start': detail.start_date,
-            'end': detail.end_date + timedelta(days=1),  # 終了日を+1日してイベントが正しく表示されるようにします
-            'color': '#3498DB'  # ここで色を指定できます
+            'start': detail.start_date.strftime('%Y-%m-%d'),
+            'end': (detail.end_date + timedelta(days=1)).strftime('%Y-%m-%d'),
+            'color': colors[detail.employee_id % len(colors)],
+            'employeeId': detail.employee_id 
         } for detail in details]
-
+        
         return jsonify(events)
     except Exception as e:
+        app.logger.error(f"Error occurred: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
 
 # データベース初期化の処理
 with app.app_context():

@@ -2,7 +2,8 @@ function formatDate(dateString) {
     let date = new Date(dateString);
     let yyyy = date.getFullYear();
     let mm = String(date.getMonth() + 1).padStart(2, '0');
-    return yyyy + '-' + mm;
+    let dd = String(date.getDate()).padStart(2, '0');
+    return yyyy + '-' + mm + '-' + dd;
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -16,7 +17,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 return {
                     ...event,
                     start: formatDate(event.start),
-                    end: formatDate(event.end)
+                    end: formatDate(event.end),
+                    title:'',
+                    backgroundColor: event.color
                 };
             });
 
@@ -37,22 +40,19 @@ document.addEventListener("DOMContentLoaded", function () {
                     const calendarEl = calendarContainer.querySelector('.month-calendar:nth-child(' + (i + 1) + ')');
                     var calendar = new FullCalendar.Calendar(calendarEl, {
                         initialView: "dayGrid",
-                        dayCellContent: '', // 日にちを表示しない
-                        events: employeeEvents,  // この社員のイベントだけを渡す
-                        eventColor: 'blue',
+                        dayCellContent: '', 
+                        events: employeeEvents,  // 全てのイベントを渡す
                         titleFormat: { month: 'numeric', year: 'numeric' },
                         validRange: {
                             start: displayStartDate.toISOString().slice(0, 7),
                             end: displayEndDate.toISOString().slice(0, 7)
                         },
-
                         height: 'auto',
                         aspectRatio: 5.5,
                         dayHeaderContent: ''  ,
                         headerToolbar:{
                             right:''
                         },
-
                         footerToolbar: {
                             left: '',
                             center: '',
