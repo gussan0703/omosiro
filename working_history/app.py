@@ -126,7 +126,7 @@ def api_employee_periods():
         current_month = datetime.today().month
         current_year = datetime.today().year
         # 今後6ヶ月間の期間内のイベントをフィルタリングするための終了日を計算します
-        end_month = current_month + 6
+        end_month = current_month + 12
         end_year = current_year
         if end_month > 12:
             end_month -= 12

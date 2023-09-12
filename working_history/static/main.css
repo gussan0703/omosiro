@@ -1,14 +1,19 @@
 /* static/styles.css or main.css */
 .employee-calendar {
-    display: inline-block;
-    width: 150px;  /* 月ごとのカレンダーの幅 */
+   justify-content: space-between;
+    width: 100%;  /* 月ごとのカレンダーの幅 */
     vertical-align: top;
     display: flex; /* 子要素を横並びにする */
 }
 
+#employee-list{
+    margin: 0 auto;
+}
+
 .month-calendar {
-    flex: 1;      /* 均等にスペースを取る */
-    margin-right: 10px;  /* 右側の間隔 */
+    flex: 1; /* 均等にスペースを取る */
+    margin-right: 2%;  /* 均等な間隔を取るための調整 */
+    max-width: calc(100% / 12 - 2%); /* 画面幅を12で割って、マージンを引く */
 }
 
 .month-calendar:last-child {
@@ -16,8 +21,24 @@
 }
 
 .employee-calendar .month-calendar {
+    border-radius: 50%; /* これにより丸くなります */
     border: 1px solid black; /* ボーダーの太さと色を変更できます */
+    /* overflow: hidden; 子要素が丸い形状の外に出ないようにする */
     margin: 10px;           /* 他の要素との間隔を追加 */
     padding: 10px;          /* カレンダー内部の間隔を追加 */
     box-sizing: border-box; /* ボーダーとパディングが要素の大きさに含まれるように */
+}
+
+/* 日付ますの非表示に挑戦 */
+.fc-view-harness {
+    display: none;
+}
+
+.fc-header-toolbar button{
+    display:none !important;
+
+}
+
+.employee-calendar:hover {
+    cursor: pointer; /* クリック可能なアイコンに変更 */
 }
