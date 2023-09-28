@@ -2,14 +2,27 @@ function formatDate(dateString) {
     let date = new Date(dateString);
     let yyyy = date.getFullYear();
     let mm = String(date.getMonth() + 1).padStart(2, '0');
-    let dd = String(date.getDate()).padStart(2, '0');
-    return yyyy + '-' + mm + '-' + dd;
+    return yyyy + '-' + mm;
+}
+
+function daysInMonth(year, month) {
+    return new Date(year, month, 0).getDate();
 }
 
 document.addEventListener("DOMContentLoaded", function () {
     const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+    const memoButtons = document.querySelectorAll('.memo-btn');
+    memoButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const memoText = prompt("メモを入力してください：", "");
+            if (memoText) {
+                btn.setAttribute('data-memo', memoText);
+            }
+        });
+    });
 
-    // APIからデータを取得
     fetch('/api/employee_periods')
         .then(response => response.json())
         .then(data => {
@@ -18,70 +31,46 @@ document.addEventListener("DOMContentLoaded", function () {
                     ...event,
                     start: formatDate(event.start),
                     end: formatDate(event.end),
-                    title:'',
+                    title: '',
                     backgroundColor: event.color
                 };
             });
 
             document.querySelectorAll('.employee-calendar').forEach((calendarContainer) => {
                 const employeeId = parseInt(calendarContainer.dataset.employeeId);
-
-                // この社員のイベントだけをフィルタリング
                 const employeeEvents = events.filter(event => event.employeeId == employeeId);
-                
-                for(let i = 0; i < 12; i++) {
-                    const displayStartDate = new Date(currentDate);
-                    displayStartDate.setMonth(currentDate.getMonth() + i);
-                    const displayEndDate = new Date(displayStartDate);
-                    displayEndDate.setMonth(displayStartDate.getMonth() + 1);
-                    displayEndDate.setDate(0);
 
-                    // この月に該当する従業員のイベントを探す
-                    const currentMonthEvents = employeeEvents.filter(event => 
+                for (let i = 0; i < 12; i++) {
+                    const targetYear = (currentMonth + i) >= 12 ? currentYear + 1 : currentYear;
+                    const targetMonth = (currentMonth + i) % 12;
+                    const displayStartDate = new Date(targetYear, targetMonth, 1);
+                    const displayEndDate = new Date(targetYear, targetMonth + 1, 0);
+
+                    const currentMonthEvents = employeeEvents.filter(event =>
                         new Date(event.start) <= displayEndDate && new Date(event.end) >= displayStartDate
                     );
 
                     const calendarEl = calendarContainer.querySelector('.month-calendar:nth-child(' + (i + 1) + ')');
 
-                    // イベントがある場合、背景色を設定
-                    if (currentMonthEvents.length > 0) {
-                        calendarEl.style.backgroundColor = currentMonthEvents[0].backgroundColor;
-                    }
+                    if (calendarEl) {
+                        const monthTitleEl = calendarEl.querySelector('.month-title');
+                        const displayMonth = displayStartDate.getMonth() + 1;
+                        const displayYear = displayStartDate.getFullYear();
+                        monthTitleEl.textContent = `${displayYear}年\n${displayMonth}月`;
 
-                    // FullCalendarの初期化
-                    var calendar = new FullCalendar.Calendar(calendarEl, {
-                        initialView: "dayGrid",
-                        dayCellContent: '', 
-                        events: employeeEvents, 
-                        titleFormat: { month: 'numeric', year: 'numeric' },
-                        validRange: {
-                            start: displayStartDate.toISOString().slice(0, 7),
-                            end: displayEndDate.toISOString().slice(0, 7)
-                        },
-                        height: 'auto',
-                        aspectRatio: 5.5,
-                        dayHeaderContent: ''  ,
-                        headerToolbar:{
-                            right:''
-                        },
-                        footerToolbar: {
-                            left: '',
-                            center: '',
-                            right: ''
+
+                        if (currentMonthEvents.length > 0) {
+                            calendarEl.style.backgroundColor = currentMonthEvents[0].backgroundColor;
                         }
-                    });
-                    calendar.render();
 
-                    calendarEl.addEventListener('click', function() {
-                        // クリックされたカレンダーに関連するスタッフのイベントを取得
-                        let relatedEvents = events.filter(event => event.employeeId == employeeId);
-        
-                        // 関連するスタッフの情報を表示するロジックをここに書く
-                        // 例: アラートで表示
-                        relatedEvents.forEach(event => {
-                            alert(`スタッフID: ${event.employeeId}, 開始日: ${event.start}, 終了日: ${event.end}`);
+                        calendarEl.addEventListener('click', function () {
+                            let relatedEvents = events.filter(event => event.employeeId == employeeId);
+                            relatedEvents.forEach(event => {
+                                alert(`スタッフID: ${event.employeeId}, 開始月: ${event.start}, 終了月: ${event.end}, メモ: ${event.memo || 'なし'}`);
+                            });
                         });
-                    });
+                        
+                    }
                 }
             });
         });

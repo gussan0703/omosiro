@@ -30,6 +30,7 @@ class EmployeeDetail(db.Model):
     employee = db.relationship('Employee', backref='employee_details')  # これを追加
     start_date = db.Column(db.Date, nullable=True)
     end_date = db.Column(db.Date, nullable=True)
+    memo = db.Column(db.String(255), nullable=True)
 
 
 #社員の登録
@@ -92,6 +93,7 @@ def employee_detail(id):
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
         end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else None
         period = f"{start_date_str} から {end_date_str}"
+        memo = request.form.get('memo')
 
 
         if not name or not category:
@@ -108,8 +110,9 @@ def employee_detail(id):
             detail.price = float(price)
             detail.start_date = start_date
             detail.end_date = end_date
+            detail.memo = memo
         else:
-            new_detail = EmployeeDetail(project_name=project_name, overview=overview, start_date=start_date,end_date=end_date,period=period, price=float(price), employee_id=employee.id)
+            new_detail = EmployeeDetail(project_name=project_name, overview=overview, start_date=start_date,end_date=end_date,period=period, price=float(price), employee_id=employee.id,memo=memo)
             db.session.add(new_detail)
 
         db.session.commit()
@@ -148,7 +151,8 @@ def api_employee_periods():
             'start': detail.start_date.strftime('%Y-%m-%d'),
             'end': (detail.end_date + timedelta(days=1)).strftime('%Y-%m-%d'),
             'color': colors[detail.employee_id % len(colors)],
-            'employeeId': detail.employee_id 
+            'employeeId': detail.employee_id,
+            'memo': detail.memo
         } for detail in details]
         
         return jsonify(events)

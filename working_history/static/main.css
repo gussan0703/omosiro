@@ -1,44 +1,108 @@
-/* static/styles.css or main.css */
+/* カレンダーコンポーネントのスタイル */
 .employee-calendar {
-   justify-content: space-between;
-    width: 100%;  /* 月ごとのカレンダーの幅 */
-    vertical-align: top;
-    display: flex; /* 子要素を横並びにする */
+    display: flex;
+    flex-wrap: nowrap; /* 折り返しを防ぐ */
+    gap: 10px;
+    overflow-x: auto; /* 画面の横幅を超える場合はスクロール可能にする */
 }
 
-#employee-list{
-    margin: 0 auto;
-}
 
 .month-calendar {
-    flex: 1; /* 均等にスペースを取る */
-    margin-right: 2%;  /* 均等な間隔を取るための調整 */
-    max-width: calc(100% / 12 - 2%); /* 画面幅を12で割って、マージンを引く */
+    flex-basis: calc(100% / 12 - 10px); /* 12カ月分を1行に並べるように変更 */
+    max-width: calc(100% / 12 - 10px); /* 追加: 最大幅も指定する */
+    height: calc((100vw - 120px) / 12); /* 追加: 正方形になるように高さを指定 */
+    border: 1px solid #ddd;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    padding: 8px;
+    overflow: hidden;
+    position: relative;
 }
 
-.month-calendar:last-child {
-    margin-right: 0;  /* 最後の要素の右側の間隔は0にする */
+
+.month-calendar:before {
+    content: attr(data-month-title);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 4px 0;
+    text-align: center;
+    font-weight: bold;
+    z-index: 1;
 }
 
-.employee-calendar .month-calendar {
-    border-radius: 50%; /* これにより丸くなります */
-    border: 1px solid black; /* ボーダーの太さと色を変更できます */
-    /* overflow: hidden; 子要素が丸い形状の外に出ないようにする */
-    margin: 10px;           /* 他の要素との間隔を追加 */
-    padding: 10px;          /* カレンダー内部の間隔を追加 */
-    box-sizing: border-box; /* ボーダーとパディングが要素の大きさに含まれるように */
+.month-calendar tbody {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
 }
 
-/* 日付ますの非表示に挑戦 */
-.fc-view-harness {
-    display: none;
+.month-calendar td {
+    text-align: center;
+    padding: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
-.fc-header-toolbar button{
-    display:none !important;
-
+.month-calendar td:hover {
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
-.employee-calendar:hover {
-    cursor: pointer; /* クリック可能なアイコンに変更 */
+/* スマホサイズ時のスタイル */
+@media (max-width: 600px) {
+    .employee-calendar {
+        overflow-x: auto;  /* 横方向にスクロールを許可 */
+        display: flex;
+        flex-wrap: nowrap;  /* カレンダーを折り返さないように設定 */
+    }
+
+    .employee-calendar .month-calendar {
+        flex: 0 0 calc(33.33% - 10px);  /* 3カ月分だけ表示 */
+        max-width: calc(33.33% - 10px);  /* 最大幅も同じ値に */
+
+        /* カレンダーの高さを幅と同じにして正方形にする */
+        height: calc(33.33vw - 10px);
+        overflow: hidden; /* 高さを超える内容を隠す */
+    }
+
+    .month-calendar .calender-table {
+        /* テーブルの高さをカレンダーコンテナの高さと一致させる */
+        height: 100%;
+    }
+
+    .month-title {
+        font-size: 1.2rem;  /* 月のタイトルのフォントサイズを大きくする */
+    }
+
+    .month-calendar table {
+        font-size: 1rem;  /* カレンダー内の日付のフォントサイズを大きくする */
+    }
+
+    body {
+        font-size: 12px; /* 文字サイズを12pxに */
+    }
+}
+
+/* カレンダーの月のタイトルを2行にする */
+.month-title {
+    white-space: pre-line; /* 改行コードを考慮 */
+    line-height: 1.2; /* 行の間隔調整 */
+}
+
+#employee-list li {
+    margin-bottom: 2rem;  /* スタッフごとのリストの下部のマージンを2remに設定 */
+}
+
+/* カレンダーにhoverしたときのスタイル */
+.month-calendar:hover {
+    box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.4);  /* 右と下にシャドウを大きくして、より立体感を出す */
+    cursor: pointer;
+}
+
+/* カレンダーをクリックしたときのスタイル */
+.month-calendar:active {
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);  /* 右と下にシャドウを少し小さくして、押された時の感じを出す */
+    transform: translateY(2px);
 }

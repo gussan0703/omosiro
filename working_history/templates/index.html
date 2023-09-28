@@ -13,10 +13,9 @@
       href="{{ url_for('static', filename='main.css') }}"
     />
 
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.2/main.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.2/main.min.css">
+    <!--<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.2/main.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.2/main.min.css">-->
     <script src="{{ url_for('static', filename='main.js') }}"></script>
-
   </head>
   <body>
     <header>
@@ -68,19 +67,19 @@
 
             <!--社員のカレンダーをコンポネート-->
             <div class="employee-calendar" data-employee-id="{{ employee.id }}">
-              <div class="month-calendar"></div>
-              <div class="month-calendar"></div>
-              <div class="month-calendar"></div>
-              <div class="month-calendar"></div>
-              <div class="month-calendar"></div>
-              <div class="month-calendar"></div>
-              <div class="month-calendar"></div>
-              <div class="month-calendar"></div>
-              <div class="month-calendar"></div>
-              <div class="month-calendar"></div>
-              <div class="month-calendar"></div>
-              <div class="month-calendar"></div>
-          </div>          
+              {% for month in range(1, 13) %}
+              <div class="month-calendar">
+                <div class="month-title">2023年{{ month }}月</div>
+                <!-- この部分はJavaScriptで動的に変更する -->
+                <button class="memo-btn">メモ</button>
+                <table class="calender-table">
+                  <tbody>
+                    <!-- この部分はJavaScriptで動的に埋める -->
+                  </tbody>
+                </table>
+              </div>
+              {% endfor %}
+            </div>
           </li>
           {% endfor %}
         </ul>
