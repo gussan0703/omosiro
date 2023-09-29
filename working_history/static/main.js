@@ -11,6 +11,25 @@ document.addEventListener("DOMContentLoaded", function () {
         return targetDate >= startDate && targetDate <= endDate;
     }
 
+    function calendarClickHandler() {
+        if (this.classList.contains('clickable')) {
+            const calendarEl = this;
+            const employeeId = parseInt(calendarEl.closest('.employee-calendar').dataset.employeeId);
+            const monthTitleEl = calendarEl.querySelector('.month-title');
+            const memoMonthFormat = monthTitleEl.textContent.trim().replace('年', '-').replace('月', '').padStart(7, '0');
+            const relatedEvents = events.filter(event => event.employeeId === employeeId && isBetween(memoMonthFormat, event.start, event.end));
+            const relatedEmployee = events.find(event => event.employeeId === employeeId);
+            const memoEvent = relatedEmployee ? relatedEmployee.memos.find(memo => memo.memo_month === memoMonthFormat) : null;
+            const memo = memoEvent ? memoEvent.memo : 'なし';
+            relatedEvents.forEach(relatedEvent => {
+                const projectName = relatedEvent.project_name || 'なし';
+                const overview = relatedEvent.overview || 'なし';
+                const price = relatedEvent.price || 'なし';
+                alert(`スタッフ名: ${relatedEvent.title}\nプロジェクト名: ${projectName}\n概要: ${overview}\n価格: ${price}\nメモ: ${memo}`);
+            });
+        }
+    }
+
     function fetchAndRenderEvents() {
         fetch('/api/employee_periods')
             .then(response => response.json())
@@ -47,27 +66,8 @@ document.addEventListener("DOMContentLoaded", function () {
                             memoBtn.style.backgroundColor = "";  // 元の色にリセット
                         }
 
-                        calendarEl.addEventListener('click', function() {
-                            if (calendarEl.classList.contains('clickable')) {
-                                // 選択した月に関連するイベントを探します。
-                                let relatedEvents = events.filter(event => event.employeeId === employeeId && isBetween(memoMonthFormat, event.start, event.end));
-                        
-                                // 選択した月に対応するメモを探します。
-                                const relatedEmployee = events.find(event => event.employeeId === employeeId);
-                                const memoEvent = relatedEmployee ? relatedEmployee.memos.find(memo => memo.memo_month === memoMonthFormat) : null;
-                                const memo = memoEvent ? memoEvent.memo : 'なし';
-                        
-                                relatedEvents.forEach(relatedEvent => {
-                                    const projectName = relatedEvent.project_name || 'なし';
-                                    const overview = relatedEvent.overview || 'なし';
-                                    const price = relatedEvent.price || 'なし';
-                        
-                                    alert(`スタッフ名: ${relatedEvent.title}\nプロジェクト名: ${projectName}\n概要: ${overview}\n価格: ${price}\nメモ: ${memo}`);
-                                });
-                            }
-                        });                        
-                        
-                        
+                        calendarEl.removeEventListener('click', calendarClickHandler);
+                        calendarEl.addEventListener('click', calendarClickHandler);
                     }
                 });
             });
@@ -76,7 +76,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll('.memo-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
-
 
             const employeeId = btn.closest('.employee-calendar').getAttribute('data-employee-id');
             const monthTitle = btn.parentElement.querySelector('.month-title').textContent.trim();
