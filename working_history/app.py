@@ -16,6 +16,13 @@ class Employee(db.Model):
     name = db.Column(db.String(80), nullable=False)
     category = db.Column(db.String(80), nullable=False)
 
+class EmployeeMemo(db.Model):
+    __tablename__ = 'employee_memo'
+    id = db.Column(db.Integer, primary_key=True)
+    employee_id = db.Column(db.Integer, db.ForeignKey('employee.id'), nullable=False)
+    memo_month = db.Column(db.String(7), nullable=True)
+    memo = db.Column(db.String(255), nullable=True)
+
 class EmployeeDetail(db.Model):
     __tablename__ = 'employee_detail'
     id = db.Column(db.Integer, primary_key=True)
@@ -27,8 +34,11 @@ class EmployeeDetail(db.Model):
     employee = db.relationship('Employee', backref='employee_details')
     start_date = db.Column(db.Date, nullable=True)
     end_date = db.Column(db.Date, nullable=True)
-    memo = db.Column(db.String(255), nullable=True)
-    memo_month = db.Column(db.String(7), nullable=True)
+
+def isBetween(target, start, end):
+    if start and end:
+        return start <= target <= end
+    return False
 
 @app.route('/add_employee', methods=['POST'])
 def add_employee():
@@ -90,7 +100,6 @@ def employee_detail(id):
             detail.price = float(price)
             detail.start_date = start_date
             detail.end_date = end_date
-            detail.memo = memo
         else:
             new_detail = EmployeeDetail(
                 project_name=project_name, 
@@ -100,7 +109,6 @@ def employee_detail(id):
                 period=period, 
                 price=float(price), 
                 employee_id=employee.id,
-                memo=memo
             )
             db.session.add(new_detail)
         db.session.commit()
@@ -110,56 +118,64 @@ def employee_detail(id):
 
 @app.route('/update_memo', methods=['POST'])
 def update_memo():
-    employee_detail_id = request.json.get('employee_detail_id')
+    employee_id = request.json.get('employee_id')
     memo_month = request.json.get('memo_month')
     memo = request.json.get('memo')
-    detail = EmployeeDetail.query.filter_by(id=employee_detail_id, memo_month=memo_month).first()
-    if not detail:
-        new_detail = EmployeeDetail(
-            employee_id=employee_detail_id, 
-            memo_month=memo_month, 
-            memo=memo,
-            project_name='プロジェクト名未設定',
-            period='未定'
-        )
-        db.session.add(new_detail)
-    else:
-        detail.memo = memo
+    memo_record = EmployeeMemo.query.filter_by(employee_id=employee_id, memo_month=memo_month).first()
+
+    if not memo_record and memo:
+        new_memo = EmployeeMemo(employee_id=employee_id, memo_month=memo_month, memo=memo)
+        db.session.add(new_memo)
+    elif memo_record and memo:
+        memo_record.memo = memo
+    elif memo_record and not memo:
+        db.session.delete(memo_record)
+    
     db.session.commit()
     return jsonify({'status': 'success'})
 
 @app.route('/delete_memo', methods=['POST'])
 def delete_memo():
-    employee_detail_id = request.json.get('employee_detail_id')
+    employee_id = request.json.get('employee_id')
     memo_month = request.json.get('memo_month')
-
-    detail = EmployeeDetail.query.filter_by(employee_id=employee_detail_id, memo_month=memo_month).first()
-    if detail:
-        db.session.delete(detail)
+    memo_record = EmployeeMemo.query.filter_by(employee_id=employee_id, memo_month=memo_month).first()
+    if memo_record:
+        db.session.delete(memo_record)
         db.session.commit()
         return jsonify({'status': 'success'})
     else:
         return jsonify({'status': 'error', 'message': '該当するメモが見つかりませんでした。'})
 
-
-
 @app.route('/api/employee_periods')
 def api_employee_periods():
     details = EmployeeDetail.query.all()
+    memos = EmployeeMemo.query.all()
     colors = ['#3498DB', '#E74C3C', '#2ECC71', '#F39C12', '#9B59B6']
 
     events = [{
         'title': detail.employee.name,
-        'start': detail.start_date.strftime('%Y-%m-%d') if detail.start_date else None,
-        'end': (detail.end_date + timedelta(days=1)).strftime('%Y-%m-%d') if detail.end_date else None,
+        'start': detail.start_date.strftime('%Y-%m') if detail.start_date else None,
+        'end': detail.end_date.strftime('%Y-%m') if detail.end_date else None,
         'color': colors[detail.employee_id % len(colors)],
         'employeeId': detail.employee_id,
-        'memo': detail.memo,
-        'memo_month': detail.memo_month,
-        'project_start_month': detail.start_date.strftime('%Y-%m') if detail.start_date else None,
-        'project_end_month': detail.end_date.strftime('%Y-%m') if detail.end_date else None
+        'project_name': detail.project_name,
+        'overview': detail.overview,
+        'price': detail.price,
+        'memos': []  # メモをリストとして追加
     } for detail in details]
+
+    for event in events:
+        # 期間内のすべてのメモを取得
+        related_memos = [memo for memo in memos if memo.employee_id == event['employeeId'] and event['start'] <= memo.memo_month <= event['end']]
+        for memo_record in related_memos:
+            event['memos'].append({
+                'memo': memo_record.memo,
+                'memo_month': memo_record.memo_month
+            })
+
     return jsonify(events)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
+
